@@ -1,22 +1,16 @@
 package pl.dopierala.allegroreporeaderapi;
 
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-import pl.dopierala.allegroreporeaderapi.Model.Repository;
-
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -24,21 +18,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static pl.dopierala.allegroreporeaderapi.ServiceTest.createSampleRepos;
-
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-//@ContextConfiguration
-public class ControllerTest {
+public class ServiceAndControllerIntegrationTest {
 
-    private MockMvc mockMvc;
+    @Autowired
+    private Controller repoController;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @MockBean
-    private RepoService repoServiceMock;
+    private MockMvc mockMvc;
 
     @Before
     public void prepareTest(){
@@ -47,25 +38,13 @@ public class ControllerTest {
     }
 
     @Test
-    public void context_load(){
-        Assert.assertNotNull(repoServiceMock);
-    }
+    public void should_return_real_repositories() throws Exception {
 
-    @Test
-    public void should_ask_service_for_sample_user_repositories() throws Exception {
-
-        List<Repository> sampleRepos = createSampleRepos();
-
-        when(repoServiceMock.getUserRepos("sample_user")).thenReturn(sampleRepos);
-
-        mockMvc.perform(get("/api/v1/getRepos/sample_user").accept(MediaType.APPLICATION_JSON_UTF8))
+        mockMvc.perform(get("/api/v1/getRepos/piotrdopierala").accept(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andExpect(jsonPath("$..name").value(Matchers.hasItem("sample_repo_1")))
-                .andExpect(jsonPath("$..name").value(Matchers.hasItem("sample_repo_2")))
+                .andExpect(jsonPath("$..name").value(Matchers.hasItem("piotrdopierala/CodeWars")))
+                .andExpect(jsonPath("$..name").value(Matchers.hasItem("piotrdopierala/MedivalGame")))
                 .andExpect(status().isOk());
     }
-
-
-
 }

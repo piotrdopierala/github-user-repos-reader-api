@@ -17,11 +17,9 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 import pl.dopierala.allegroreporeaderapi.Model.Repository;
 
-import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.time.ZoneId;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -41,47 +39,31 @@ public class ServiceTest {
 
     private MockRestServiceServer mockServer;
     private ObjectMapper mapper = new ObjectMapper();
+    private List<Repository> repositoriesSample;
 
     @Before
     public void init() {
         mockServer = MockRestServiceServer.createServer(restTemplate);
+        repositoriesSample = createSampleRepos();
     }
 
     @Test
     public void givenMockRestService_whenGetIsCalled_thenReturnsMockedObject() throws JsonProcessingException {
 
-        List<RepositoryMockModel> mockRepos = new ArrayList<>();
-
-        RepositoryMockModel rep1 = new RepositoryMockModel();
-        rep1.setName("mock_repo1");
-        rep1.setCreatedAt(LocalDateTime.now());
-        rep1.setUrl("http://localhost");
-        rep1.setDescription("Mock repo 1 description");
-
-        RepositoryMockModel rep2 = new RepositoryMockModel();
-        rep2.setName("mock_repo2");
-        rep2.setCreatedAt(LocalDateTime.now());
-        rep2.setUrl("http://localhost");
-        rep2.setDescription("Mock repo 2 description");
-
-        mockRepos.add(rep1);
-        mockRepos.add(rep2);
-
-        String test = mapper.writeValueAsString(mockRepos);
+        String reposMockJson = generateJsonStringFromRepos(repositoriesSample);
 
         mockServer.expect(ExpectedCount.once(),
                 requestTo("https://api.github.com/users/mockUser/repos"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(HttpStatus.OK)
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .body(mapper.writeValueAsString(mockRepos))
+                        .body(reposMockJson)
                 );
 
         List<Repository> fetchedRepos = repoService.getUserRepos("mockUser");
         mockServer.verify();
 
-        Assert.assertEquals(mockRepos,fetchedRepos);
-
+        Assert.assertEquals(repositoriesSample, fetchedRepos);
     }
 
     @Test
@@ -91,8 +73,42 @@ public class ServiceTest {
     }
 
     @Test
-    public void invalid_Json_should_throw_exception() throws Exception {
+    public void invalid_Json_should_throw_exception() throws Exception { //todo invalid json test for exception
 
+    }
+
+    private String generateJsonStringFromRepos(List<Repository> repos) throws JsonProcessingException {
+        List<Map<String, Object>> repositoriesJsonMockModel = new ArrayList<>();
+        for (Repository repo : repos) {
+            Map<String, Object> repositoryJsonMockModel = new HashMap<>();
+            repositoryJsonMockModel.put("full_name", repo.getName());
+            repositoryJsonMockModel.put("html_url", repo.getUrl());
+            repositoryJsonMockModel.put("description", repo.getDescription());
+            repositoryJsonMockModel.put("created_at", repo.getCreatedAt().atZone(ZoneId.of("Europe/Warsaw")).withZoneSameInstant(ZoneId.of("Z")).toInstant().toString());
+            repositoriesJsonMockModel.add(repositoryJsonMockModel);
+        }
+        return mapper.writeValueAsString(repositoriesJsonMockModel);
+    }
+
+    public static List<Repository> createSampleRepos() {
+        List<Repository> repos = new ArrayList<>();
+
+        Repository repo1 = new Repository();
+        repo1.setName("sample_repo_1");
+        repo1.setUrl("http://localhost/users/sample_user/repos/repo1");
+        repo1.setDescription("sample repo 1 test description");
+        repo1.setCreatedAt(LocalDateTime.of(2017, 05, 21, 9, 45));
+
+        Repository repo2 = new Repository();
+        repo2.setName("sample_repo_2");
+        repo2.setUrl("http://localhost/users/sample_user/repos/repo2");
+        repo2.setDescription("sample repo 2 test description");
+        repo2.setCreatedAt(LocalDateTime.now());
+
+        repos.add(repo1);
+        repos.add(repo2);
+
+        return repos;
     }
 
 }
