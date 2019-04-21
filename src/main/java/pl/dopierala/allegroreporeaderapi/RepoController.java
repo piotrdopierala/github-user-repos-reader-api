@@ -1,7 +1,6 @@
 package pl.dopierala.allegroreporeaderapi;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,12 +10,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
-public class Controller {
+public class RepoController {
 
     RepoService repoService;
 
     @Autowired
-    public Controller(RepoService repoService) {
+    public RepoController(RepoService repoService) {
         this.repoService = repoService;
     }
 

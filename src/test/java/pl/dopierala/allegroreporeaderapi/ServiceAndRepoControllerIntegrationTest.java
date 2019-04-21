@@ -13,7 +13,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -21,10 +20,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class ServiceAndControllerIntegrationTest {
+public class ServiceAndRepoControllerIntegrationTest {
 
     @Autowired
-    private Controller repoController;
+    private RepoController repoController;
 
     @Autowired
     private WebApplicationContext webApplicationContext;

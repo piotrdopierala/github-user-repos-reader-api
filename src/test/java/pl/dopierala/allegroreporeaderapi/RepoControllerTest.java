@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -18,7 +17,6 @@ import pl.dopierala.allegroreporeaderapi.Model.Repository;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -30,7 +28,7 @@ import static pl.dopierala.allegroreporeaderapi.ServiceTest.createSampleRepos;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 //@ContextConfiguration
-public class ControllerTest {
+public class RepoControllerTest {
 
     private MockMvc mockMvc;
 
@@ -65,7 +63,4 @@ public class ControllerTest {
                 .andExpect(jsonPath("$..name").value(Matchers.hasItem("sample_repo_2")))
                 .andExpect(status().isOk());
     }
-
-
-
 }
