@@ -8,6 +8,9 @@ public class Repository {
     private String description;
     private LocalDateTime createdAt;
 
+    public Repository() {
+    }
+
     public String getName() {
         return name;
     }

@@ -12,12 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import pl.dopierala.allegroreporeaderapi.Model.Repository;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -51,10 +46,7 @@ public class ControllerTest {
     }
 
     @Test
-    public void should_return_repositories() throws Exception {
-
-        List<Repository> mockedReturnList = new ArrayList<>();
-        mockedReturnList.add(new Repository());
+    public void should_return_real_repositories() throws Exception {
 
         when(repoServiceMock.getUserRepos(any())).thenCallRealMethod();
 
@@ -66,9 +58,6 @@ public class ControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    public void invalid_Json_should_throw_exception() throws Exception {
 
-    }
 
 }
