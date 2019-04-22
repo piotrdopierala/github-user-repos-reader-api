@@ -1,14 +1,12 @@
 package pl.dopierala.allegroreporeaderapi;
 
-//import org.json.JSONArray;
-//import org.json.JSONException;
-//import org.json.JSONObject;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import pl.dopierala.allegroreporeaderapi.Exceptions.ParseToJsonNotPossible;
 import pl.dopierala.allegroreporeaderapi.Exceptions.UserNotFound;
@@ -48,7 +46,8 @@ public class RepoService {
             receivedReposString = restTemplate.getForObject(url, String.class);
         } catch (HttpClientErrorException e) {
             System.out.println(receivedReposString);
-            throw new UserNotFound();
+            if (e.getStatusCode().equals(HttpStatus.NOT_FOUND))
+                throw new UserNotFound();
         }
 
         ObjectMapper mapper = new ObjectMapper();

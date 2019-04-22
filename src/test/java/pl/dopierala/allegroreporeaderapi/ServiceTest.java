@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
+import pl.dopierala.allegroreporeaderapi.Exceptions.UserNotFound;
 import pl.dopierala.allegroreporeaderapi.Model.Repository;
 
 import java.time.LocalDateTime;
@@ -70,6 +71,19 @@ public class ServiceTest {
     public void null_name_should_return_empty_list() {
         List<Repository> retList = repoService.getUserRepos(null);
         assertThat(retList, hasSize(0));
+    }
+
+    @Test(expected = UserNotFound.class)
+    public void wrong_name_should_throw_exception() {
+        mockServer.expect(ExpectedCount.once(),
+                requestTo("https://api.github.com/users/non_exist_user/repos"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.NOT_FOUND)
+                );
+
+        List<Repository> retList = repoService.getUserRepos("non_exist_user");
+        mockServer.verify();
+
     }
 
     @Test
