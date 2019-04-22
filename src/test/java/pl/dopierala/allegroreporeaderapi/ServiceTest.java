@@ -74,6 +74,21 @@ public class ServiceTest {
         assertThat(retList, hasSize(0));
     }
 
+    @Test
+    public void user_with_no_repos_should_return_empty_list() {
+        mockServer.expect(ExpectedCount.once(),
+                requestTo("https://api.github.com/users/username2/repos"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.OK)
+                .body("[]")
+                );
+
+        List<Repository> retList = repoService.getUserRepos("username2");
+
+        mockServer.verify();
+        assertThat(retList, hasSize(0));
+    }
+
     @Test(expected = UserNotFound.class)
     public void wrong_name_should_throw_exception() {
         mockServer.expect(ExpectedCount.once(),
@@ -87,12 +102,12 @@ public class ServiceTest {
     }
 
     @Test(expected = ParseToJsonNotPossible.class)
-    public void invalid_Json_should_throw_exception(){
+    public void invalid_Json_should_throw_exception() {
         mockServer.expect(ExpectedCount.once(),
                 requestTo("https://api.github.com/users/non_exist_user/repos"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(HttpStatus.OK)
-                .body("[{\"test\":\"value\"},{\"test2\":2}]")
+                        .body("[{\"test\":\"value\"},{\"test2\":2}]")
                 );
 
         List<Repository> retList = repoService.getUserRepos("non_exist_user");
