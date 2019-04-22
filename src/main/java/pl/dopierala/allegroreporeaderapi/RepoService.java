@@ -58,6 +58,7 @@ public class RepoService {
             e.printStackTrace();
         }
 
+
         for (int i = 0; i < fetchedReposJson.size(); i++) {//todo throw parseToJsonNotPossible when wrong json received.
             JsonNode repoJson = fetchedReposJson.get(i);
             fetchedRepos.add(parseRepository(repoJson));
@@ -65,11 +66,13 @@ public class RepoService {
         return fetchedRepos;
     }
 
-    private Repository parseRepository(JsonNode json) {
+    private Repository parseRepository(JsonNode json) throws ParseToJsonNotPossible {
         Repository repo = new Repository();
 
         if (json.has(RESP_FIELD_FULL_NAME))
             repo.setName(json.get(RESP_FIELD_FULL_NAME).asText());
+        else
+            throw new ParseToJsonNotPossible();
         if (json.has(RESP_FIELD_DESCRIPTION))
             repo.setDescription(json.get(RESP_FIELD_DESCRIPTION).asText());
         if (json.has(RESP_FIELD_URL))

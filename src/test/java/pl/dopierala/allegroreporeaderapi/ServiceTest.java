@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
+import pl.dopierala.allegroreporeaderapi.Exceptions.ParseToJsonNotPossible;
 import pl.dopierala.allegroreporeaderapi.Exceptions.UserNotFound;
 import pl.dopierala.allegroreporeaderapi.Model.Repository;
 
@@ -83,12 +84,19 @@ public class ServiceTest {
 
         List<Repository> retList = repoService.getUserRepos("non_exist_user");
         mockServer.verify();
-
     }
 
-    @Test
-    public void invalid_Json_should_throw_exception() throws Exception { //todo invalid json test for exception
+    @Test(expected = ParseToJsonNotPossible.class)
+    public void invalid_Json_should_throw_exception(){
+        mockServer.expect(ExpectedCount.once(),
+                requestTo("https://api.github.com/users/non_exist_user/repos"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.OK)
+                .body("[{\"test\":\"value\"},{\"test2\":2}]")
+                );
 
+        List<Repository> retList = repoService.getUserRepos("non_exist_user");
+        mockServer.verify();
     }
 
     private String generateJsonStringFromRepos(List<Repository> repos) throws JsonProcessingException {
