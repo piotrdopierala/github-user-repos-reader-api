@@ -73,11 +73,11 @@ public class RepoService {
             repo.setName(json.get(RESP_FIELD_FULL_NAME).asText());
         else
             throw new ParseToJsonNotPossible();
-        if (json.has(RESP_FIELD_DESCRIPTION))
+        if (json.has(RESP_FIELD_DESCRIPTION) && !json.get(RESP_FIELD_DESCRIPTION).isNull())
             repo.setDescription(json.get(RESP_FIELD_DESCRIPTION).asText());
-        if (json.has(RESP_FIELD_URL))
+        if (json.has(RESP_FIELD_URL) && !json.get(RESP_FIELD_URL).isNull())
             repo.setUrl(json.get(RESP_FIELD_URL).asText());
-        if (json.has(RESP_FIELD_CREATED_AT))
+        if (json.has(RESP_FIELD_CREATED_AT) && !json.get(RESP_FIELD_CREATED_AT).isNull())
             repo.setCreatedAt(LocalDateTime.ofInstant(Instant.parse(json.get(RESP_FIELD_CREATED_AT).asText()), ZoneId.of("Europe/Warsaw"))); //todo uwzglednic TimeZone uzytkownika
         return repo;
     }
