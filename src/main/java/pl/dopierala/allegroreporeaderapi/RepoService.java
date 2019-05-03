@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import pl.dopierala.allegroreporeaderapi.Exceptions.ParseToJsonNotPossible;
 import pl.dopierala.allegroreporeaderapi.Exceptions.UserNotFound;
@@ -16,12 +15,14 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Service
 public class RepoService {
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -33,7 +34,9 @@ public class RepoService {
     private static final String RESP_FIELD_DESCRIPTION = "description";
     private static final String RESP_FIELD_CREATED_AT = "created_at";
 
-    public List<Repository> getUserRepos(String userName) {//todo handle exception on page with AOP
+    public static final int MINUTES_IN_HOUR = 60;
+
+    public List<Repository> getUserRepos(String userName, int userTimeZoneOffset) {//todo handle exception on page with AOP
         if (Objects.isNull(userName)) {
             return new ArrayList<>();
         }
@@ -45,7 +48,6 @@ public class RepoService {
         try {
             receivedReposString = restTemplate.getForObject(url, String.class);
         } catch (HttpClientErrorException e) {
-            System.out.println(receivedReposString);
             if (e.getStatusCode().equals(HttpStatus.NOT_FOUND))
                 throw new UserNotFound();
         }
@@ -58,28 +60,30 @@ public class RepoService {
             e.printStackTrace();
         }
 
-
         for (int i = 0; i < fetchedReposJson.size(); i++) {//todo throw parseToJsonNotPossible when wrong json received.
             JsonNode repoJson = fetchedReposJson.get(i);
-            fetchedRepos.add(parseRepository(repoJson));
+            fetchedRepos.add(parseRepository(repoJson, userTimeZoneOffset));
         }
         return fetchedRepos;
     }
 
-    private Repository parseRepository(JsonNode json) throws ParseToJsonNotPossible {
+    private Repository parseRepository(JsonNode json, int userTimeZoneOffset) throws ParseToJsonNotPossible {
         Repository repo = new Repository();
 
-        if (json.has(RESP_FIELD_FULL_NAME))
+        if (json.has(RESP_FIELD_FULL_NAME)) {
             repo.setName(json.get(RESP_FIELD_FULL_NAME).asText());
+        }
         else
             throw new ParseToJsonNotPossible();
-        if (json.has(RESP_FIELD_DESCRIPTION) && !json.get(RESP_FIELD_DESCRIPTION).isNull())
+        if (json.has(RESP_FIELD_DESCRIPTION) && !json.get(RESP_FIELD_DESCRIPTION).isNull()) {
             repo.setDescription(json.get(RESP_FIELD_DESCRIPTION).asText());
-        if (json.has(RESP_FIELD_URL) && !json.get(RESP_FIELD_URL).isNull())
+        }
+        if (json.has(RESP_FIELD_URL) && !json.get(RESP_FIELD_URL).isNull()) {
             repo.setUrl(json.get(RESP_FIELD_URL).asText());
-        if (json.has(RESP_FIELD_CREATED_AT) && !json.get(RESP_FIELD_CREATED_AT).isNull())
-            repo.setCreatedAt(LocalDateTime.ofInstant(Instant.parse(json.get(RESP_FIELD_CREATED_AT).asText()), ZoneId.of("Europe/Warsaw"))); //todo uwzglednic TimeZone uzytkownika
+        }
+        if (json.has(RESP_FIELD_CREATED_AT) && !json.get(RESP_FIELD_CREATED_AT).isNull()) {
+            repo.setCreatedAt(LocalDateTime.ofInstant(Instant.parse(json.get(RESP_FIELD_CREATED_AT).asText()), ZoneOffset.ofHours(userTimeZoneOffset/ MINUTES_IN_HOUR)));
+        }
         return repo;
     }
-
 }

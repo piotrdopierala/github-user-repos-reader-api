@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.dopierala.allegroreporeaderapi.Model.Repository;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -21,8 +22,14 @@ public class RepoController {
 
     @GetMapping(path = "/getRepos/{user}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<List<Repository>> getRepos(@PathVariable String user,
-                                                     @RequestHeader(name="clientDateZone",required = false) String headerClientDateZone) {
-        List<Repository> userRepos = repoService.getUserRepos(user);
+                                                     @RequestHeader(name="clientTimeZoneOffset",required = false) String headerClientTimeZoneOffset) {
+        int userTimeZoneOffset;
+        if(Objects.isNull(headerClientTimeZoneOffset)){
+            userTimeZoneOffset = 0;
+        }else{
+            userTimeZoneOffset = Integer.parseInt(headerClientTimeZoneOffset);
+        }
+        List<Repository> userRepos = repoService.getUserRepos(user,userTimeZoneOffset);
         return ResponseEntity.ok(userRepos);
     }
 }

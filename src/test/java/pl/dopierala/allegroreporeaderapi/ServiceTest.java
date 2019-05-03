@@ -62,7 +62,7 @@ public class ServiceTest {
                         .body(reposMockJson)
                 );
 
-        List<Repository> fetchedRepos = repoService.getUserRepos("mockUser");
+        List<Repository> fetchedRepos = repoService.getUserRepos("mockUser", 0);
         mockServer.verify();
 
         Assert.assertEquals(repositoriesSample, fetchedRepos);
@@ -70,7 +70,7 @@ public class ServiceTest {
 
     @Test
     public void null_name_should_return_empty_list() {
-        List<Repository> retList = repoService.getUserRepos(null);
+        List<Repository> retList = repoService.getUserRepos(null, 0);
         assertThat(retList, hasSize(0));
     }
 
@@ -83,7 +83,7 @@ public class ServiceTest {
                 .body("[]")
                 );
 
-        List<Repository> retList = repoService.getUserRepos("username2");
+        List<Repository> retList = repoService.getUserRepos("username2", 0);
 
         mockServer.verify();
         assertThat(retList, hasSize(0));
@@ -97,7 +97,7 @@ public class ServiceTest {
                 .andRespond(withStatus(HttpStatus.NOT_FOUND)
                 );
 
-        List<Repository> retList = repoService.getUserRepos("non_exist_user");
+        List<Repository> retList = repoService.getUserRepos("non_exist_user", 0);
         mockServer.verify();
     }
 
@@ -110,7 +110,7 @@ public class ServiceTest {
                         .body("[{\"test\":\"value\"},{\"test2\":2}]")
                 );
 
-        List<Repository> retList = repoService.getUserRepos("non_exist_user");
+        List<Repository> retList = repoService.getUserRepos("non_exist_user", 0);
         mockServer.verify();
     }
 

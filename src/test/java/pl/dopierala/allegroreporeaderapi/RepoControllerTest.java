@@ -27,7 +27,6 @@ import static pl.dopierala.allegroreporeaderapi.ServiceTest.createSampleRepos;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-//@ContextConfiguration
 public class RepoControllerTest {
 
     private MockMvc mockMvc;
@@ -54,7 +53,7 @@ public class RepoControllerTest {
 
         List<Repository> sampleRepos = createSampleRepos();
 
-        when(repoServiceMock.getUserRepos("sample_user")).thenReturn(sampleRepos);
+        when(repoServiceMock.getUserRepos("sample_user", 0)).thenReturn(sampleRepos);
 
         mockMvc.perform(get("/api/v1/getRepos/sample_user").accept(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
