@@ -7,11 +7,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import pl.dopierala.allegroreporeaderapi.Exceptions.ParseToJsonNotPossible;
 import pl.dopierala.allegroreporeaderapi.Exceptions.UserNotFound;
 import pl.dopierala.allegroreporeaderapi.Model.Repository;
 
 import java.io.IOException;
+import java.net.URI;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -40,13 +42,18 @@ public class RepoService {
         if (Objects.isNull(userName)) {
             return new ArrayList<>();
         }
-        final String url = String.format(GITHUB_API_URL + GITHUB_API_USER_REPOS, userName);
+        final String path = String.format(GITHUB_API_URL + GITHUB_API_USER_REPOS, userName);
+        URI targetUrl = UriComponentsBuilder.fromUriString(path)
+                .queryParam("per_page","100")
+                .build()
+                .encode()
+                .toUri();
         List<Repository> fetchedRepos = new ArrayList<>();
 
         String receivedReposString = "";
 
         try {
-            receivedReposString = restTemplate.getForObject(url, String.class);
+            receivedReposString = restTemplate.getForObject(targetUrl, String.class);
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode().equals(HttpStatus.NOT_FOUND))
                 throw new UserNotFound();
