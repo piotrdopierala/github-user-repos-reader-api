@@ -1,4 +1,4 @@
-package pl.dopierala.allegroreporeaderapi.Model;
+package pl.dopierala.allegroreporeaderapi.model;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

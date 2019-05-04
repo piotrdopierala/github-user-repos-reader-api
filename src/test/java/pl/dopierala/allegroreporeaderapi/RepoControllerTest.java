@@ -13,7 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-import pl.dopierala.allegroreporeaderapi.Model.Repository;
+import pl.dopierala.allegroreporeaderapi.model.Repository;
+import pl.dopierala.allegroreporeaderapi.service.RepoService;
 
 import java.util.List;
 
@@ -53,7 +54,7 @@ public class RepoControllerTest {
 
         List<Repository> sampleRepos = createSampleRepos();
 
-        when(repoServiceMock.getUserRepos("sample_user", 0)).thenReturn(sampleRepos);
+        when(repoServiceMock.findRepositoriesByUserName("sample_user", 0)).thenReturn(sampleRepos);
 
         mockMvc.perform(get("/api/v1/getRepos/sample_user").accept(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())

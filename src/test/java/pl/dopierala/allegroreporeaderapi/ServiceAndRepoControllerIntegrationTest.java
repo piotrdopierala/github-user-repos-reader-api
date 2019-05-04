@@ -22,9 +22,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 public class ServiceAndRepoControllerIntegrationTest {
 
     @Autowired
-    private RepoController repoController;
-
-    @Autowired
     private WebApplicationContext webApplicationContext;
 
     private MockMvc mockMvc;
@@ -44,5 +41,13 @@ public class ServiceAndRepoControllerIntegrationTest {
                 .andExpect(jsonPath("$..name").value(Matchers.hasItem("piotrdopierala/CodeWars")))
                 .andExpect(jsonPath("$..name").value(Matchers.hasItem("piotrdopierala/MedivalGame")))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void should_sendStatus_404_NOT_FOUND_when_user_not_found() throws Exception {
+
+        mockMvc.perform((get("/api/v1/getRepos/nonexistentuser")))
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 }

@@ -15,9 +15,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
-import pl.dopierala.allegroreporeaderapi.Exceptions.ParseToJsonNotPossible;
-import pl.dopierala.allegroreporeaderapi.Exceptions.UserNotFound;
-import pl.dopierala.allegroreporeaderapi.Model.Repository;
+import pl.dopierala.allegroreporeaderapi.exceptions.ParseToJsonNotPossibleException;
+import pl.dopierala.allegroreporeaderapi.exceptions.UserNotFoundException;
+import pl.dopierala.allegroreporeaderapi.model.Repository;
+import pl.dopierala.allegroreporeaderapi.service.RepoService;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -55,14 +56,14 @@ public class ServiceTest {
         String reposMockJson = generateJsonStringFromRepos(repositoriesSample);
 
         mockServer.expect(ExpectedCount.once(),
-                requestTo("https://api.github.com/users/mockUser/repos"))
+                requestTo("https://api.github.com/users/mockUser/repos?per_page=100"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(HttpStatus.OK)
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .body(reposMockJson)
                 );
 
-        List<Repository> fetchedRepos = repoService.getUserRepos("mockUser", 0);
+        List<Repository> fetchedRepos = repoService.findRepositoriesByUserName("mockUser", 0);
         mockServer.verify();
 
         Assert.assertEquals(repositoriesSample, fetchedRepos);
@@ -70,47 +71,47 @@ public class ServiceTest {
 
     @Test
     public void null_name_should_return_empty_list() {
-        List<Repository> retList = repoService.getUserRepos(null, 0);
+        List<Repository> retList = repoService.findRepositoriesByUserName(null, 0);
         assertThat(retList, hasSize(0));
     }
 
     @Test
     public void user_with_no_repos_should_return_empty_list() {
         mockServer.expect(ExpectedCount.once(),
-                requestTo("https://api.github.com/users/username2/repos"))
+                requestTo("https://api.github.com/users/username2/repos?per_page=100"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(HttpStatus.OK)
                 .body("[]")
                 );
 
-        List<Repository> retList = repoService.getUserRepos("username2", 0);
+        List<Repository> retList = repoService.findRepositoriesByUserName("username2", 0);
 
         mockServer.verify();
         assertThat(retList, hasSize(0));
     }
 
-    @Test(expected = UserNotFound.class)
+    @Test(expected = UserNotFoundException.class)
     public void wrong_name_should_throw_exception() {
         mockServer.expect(ExpectedCount.once(),
-                requestTo("https://api.github.com/users/non_exist_user/repos"))
+                requestTo("https://api.github.com/users/non_exist_user/repos?per_page=100"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(HttpStatus.NOT_FOUND)
                 );
 
-        List<Repository> retList = repoService.getUserRepos("non_exist_user", 0);
+        List<Repository> retList = repoService.findRepositoriesByUserName("non_exist_user", 0);
         mockServer.verify();
     }
 
-    @Test(expected = ParseToJsonNotPossible.class)
+    @Test(expected = ParseToJsonNotPossibleException.class)
     public void invalid_Json_should_throw_exception() {
         mockServer.expect(ExpectedCount.once(),
-                requestTo("https://api.github.com/users/non_exist_user/repos"))
+                requestTo("https://api.github.com/users/non_exist_user/repos?per_page=100"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(HttpStatus.OK)
                         .body("[{\"test\":\"value\"},{\"test2\":2}]")
                 );
 
-        List<Repository> retList = repoService.getUserRepos("non_exist_user", 0);
+        List<Repository> retList = repoService.findRepositoriesByUserName("non_exist_user", 0);
         mockServer.verify();
     }
 
@@ -121,7 +122,7 @@ public class ServiceTest {
             repositoryJsonMockModel.put("full_name", repo.getName());
             repositoryJsonMockModel.put("html_url", repo.getUrl());
             repositoryJsonMockModel.put("description", repo.getDescription());
-            repositoryJsonMockModel.put("created_at", repo.getCreatedAt().atZone(ZoneId.of("Europe/Warsaw")).withZoneSameInstant(ZoneId.of("Z")).toInstant().toString());
+            repositoryJsonMockModel.put("created_at", repo.getCreatedAt().atZone(ZoneId.of("Z")).withZoneSameInstant(ZoneId.of("Z")).toInstant().toString());
             repositoriesJsonMockModel.add(repositoryJsonMockModel);
         }
         return mapper.writeValueAsString(repositoriesJsonMockModel);

@@ -1,10 +1,11 @@
-package pl.dopierala.allegroreporeaderapi;
+package pl.dopierala.allegroreporeaderapi.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.dopierala.allegroreporeaderapi.Model.Repository;
+import pl.dopierala.allegroreporeaderapi.service.RepoService;
+import pl.dopierala.allegroreporeaderapi.model.Repository;
 
 import java.util.List;
 import java.util.Objects;
@@ -29,7 +30,7 @@ public class RepoController {
         }else{
             userTimeZoneOffset = Integer.parseInt(headerClientTimeZoneOffset);
         }
-        List<Repository> userRepos = repoService.getUserRepos(user,userTimeZoneOffset);
+        List<Repository> userRepos = repoService.findRepositoriesByUserName(user,userTimeZoneOffset);
         return ResponseEntity.ok(userRepos);
     }
 }
