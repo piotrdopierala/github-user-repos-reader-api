@@ -24,10 +24,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public CorsFilter corsFilter() {
-        String localOrigin = "http://localhost:4200";
+        final String localOrigin = "http://localhost:4200";
+        final String remoteFrontOrigin = "https://repo-reader-client.herokuapp.com/";
+        final String remoteAPIOrigin = "https://repo-reader-api.herokuapp.com/";
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedOrigin(localOrigin);
+        config.addAllowedOrigin(remoteFrontOrigin);
+        config.addAllowedOrigin(remoteAPIOrigin);
         config.addAllowedMethod(CorsConfiguration.ALL);
         config.addAllowedHeader(CorsConfiguration.ALL);
         config.setAllowCredentials(true);
